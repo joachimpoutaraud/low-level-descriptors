@@ -14,10 +14,10 @@ Class main properties:
 Features to extract:
 
 - Amplitude envelope
-- Root mean square
+- Root mean square (RMS)
 - Spectral centroid
 - Spectral bandwidth
-- Zero crossing rate
+- Zero crossing rate (ZCR)
 - Spectrograms (Linear, Log-frequency, Mel)
 
 @author: joachimpoutaraud
@@ -25,7 +25,6 @@ Features to extract:
 """
 import librosa
 import librosa.display
-import IPython.display as ipd
 import matplotlib.pyplot as plt
 import numpy as np
 
