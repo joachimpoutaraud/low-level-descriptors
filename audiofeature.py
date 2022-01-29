@@ -14,6 +14,7 @@ Class main properties:
 Features to extract:
 
 - Amplitude envelope
+- Average absolute amplitude (AAA)
 - Root mean square (RMS)
 - Spectral centroid
 - Spectral bandwidth
@@ -57,14 +58,14 @@ class AudioFeature():
         if show == True:
 
             frames = range(0, amplitude_envelope.shape[0])
-            t = librosa.frames_to_time(frames)
+            frames_to_time = [(i * self.hop_size / self.sr) for i in frames]
 
             plt.figure(figsize=(15, 4))
-            librosa.display.waveplot(self.audio_file, alpha=0.3)
+            librosa.display.waveplot(self.audio_file, alpha=0.3, sr=self.sr)
             plt.title("Amplitude envelope")
             plt.xlabel('Time (seconds)')
             plt.ylabel('Amplitude')
-            plt.plot(t, amplitude_envelope, color="r", label='Amplitude envelope')
+            plt.plot(frames_to_time, amplitude_envelope, color="r", label='Amplitude envelope')
             plt.ylim(-1, 1)
             plt.legend()
 
@@ -72,6 +73,42 @@ class AudioFeature():
 
         else:
             return amplitude_envelope
+        
+        
+    def aaa(self, show=False):
+
+        """
+        Compute average absolute amplitude (AAA) value for each frame from the audio samples.
+        (To visualize average absolute amplitude set argument show to True)
+
+        """
+
+        # Pad with the reflection of the signal so that the frames are centered
+        # Padding is achieved by mirroring on the first and last values of the signal with frame_length // 2 samples
+        signal = np.pad(self.audio_file, int(self.frame_size // 2), mode='reflect')
+
+        aaa = np.zeros((int(self.shape[0]/self.hop_size)+1,))
+
+        for i, value in enumerate(range(0, self.shape[0], self.hop_size)):
+
+            aaa_formula = 1 / self.frame_size * np.sum(np.abs(signal[value:value+self.frame_size]))
+            aaa[i] = aaa_formula
+
+        if show:
+
+            frames = range(0, aaa.shape[0])
+            frames_to_time = [(i * self.hop_size / self.sr) for i in frames]
+
+            plt.figure(figsize=(16, 4))
+            librosa.display.waveplot(self.audio_file, alpha=0.3, sr=self.sr)
+            plt.title("Average absolute amplitude")
+            plt.xlabel('Time (Seconds)')
+            plt.ylabel('Magnitude')
+            plt.plot(frames_to_time, aaa, color="g", label='AAA')
+            plt.ylim(-1, 1)
+            plt.legend()
+
+            return plt.show()
 
 
     def rms(self, show=False):
@@ -96,14 +133,14 @@ class AudioFeature():
         if show:
 
             frames = range(0, rms.shape[0])
-            t = librosa.frames_to_time(frames)
+            frames_to_time = [(i * self.hop_size / self.sr) for i in frames]
 
             plt.figure(figsize=(16, 4))
-            librosa.display.waveplot(self.audio_file, alpha=0.3)
+            librosa.display.waveplot(self.audio_file, alpha=0.3, sr=self.sr)
             plt.title("Root-mean-square energy")
             plt.xlabel('Time (Seconds)')
             plt.ylabel('Magnitude')
-            plt.plot(t, rms, color="g", label='RMS')
+            plt.plot(frames_to_time, rms, color="g", label='RMS')
             plt.ylim(-1, 1)
             plt.legend()
             return plt.show()
@@ -148,11 +185,11 @@ class AudioFeature():
         if show:
 
             frames = range(0, centroid.shape[0])
-            t = librosa.frames_to_time(frames)
+            frames_to_time = [(i * self.hop_size / self.sr) for i in frames]
 
             plt.figure(figsize=(16, 4))
             plt.title("Spectral centroid")
-            plt.plot(t, centroid, color="r", label='Spectral centroid')
+            plt.plot(frames_to_time, centroid, color="r", label='Spectral centroid')
             plt.ylabel('Frequency (Hz)')
             plt.xlabel('Time (Seconds)')
             plt.legend()
@@ -200,12 +237,12 @@ class AudioFeature():
         if show:
 
             frames = range(0, bandwidth.shape[0])
-            t = librosa.frames_to_time(frames)
+            frames_to_time = [(i * self.hop_size / self.sr) for i in frames]
 
             plt.figure(figsize=(16, 4))
             plt.title("Spectral bandwidth")
-            plt.plot(t, bandwidth, color="b", label='Spectral bandwidth')
-            plt.plot(t, centroid, color="r", label='Spectral centroid', alpha=0.5)
+            plt.plot(frames_to_time, bandwidth, color="b", label='Spectral bandwidth')
+            plt.plot(frames_to_time, centroid, color="r", label='Spectral centroid', alpha=0.5)
             plt.ylabel('Frequency (Hz)')
             plt.xlabel('Time (Seconds)')
             plt.legend()
@@ -227,11 +264,12 @@ class AudioFeature():
 
         if show:
 
-            frames= range(0, zcr.shape[0])
-            t=librosa.frames_to_time(frames, hop_length=self.hop_size)
+            frames = range(0, zcr.shape[0])
+            frames_to_time = [(i * self.hop_size / self.sr) for i in frames]
+            
             plt.figure(figsize=(15, 4))
             plt.title("Zero crossing rate (ZCR)")
-            plt.plot(t, zcr, color="r", label='ZCR')
+            plt.plot(frames_to_time, zcr, color="r", label='ZCR')
             plt.ylabel('Magnitude')
             plt.xlabel('Time (Seconds)')
             plt.legend()
