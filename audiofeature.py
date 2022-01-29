@@ -42,74 +42,42 @@ class AudioFeature():
     def amplitude_envelope(self, show=False):
 
         """
-        Calculate amplitude envelope
+        Compute maximum amplitude value for each frame from the audio samples.
         (To visualize amplitude envelope set argument show to True)
 
         """
 
-        amplitude_envelope = []
+        amplitude_envelope = np.zeros((int(self.shape[0]/self.hop_size)+1,))
 
-        # calculate maximum amplitude value for each frame
-        for i in range (0, self.shape[0], self.hop_size):
-            current_frame_amplitude_envelope = max(self.audio_file[i:i+self.frame_size])
-            amplitude_envelope.append(current_frame_amplitude_envelope)
+        # compute maximum amplitude value for each frame
+        for i, value in enumerate(range(0, self.shape[0], self.hop_size)):
+            current_frame_amplitude_envelope = max(self.audio_file[value:value+self.frame_size])
+            amplitude_envelope[i] = current_frame_amplitude_envelope
 
         if show == True:
-            ae = np.array(amplitude_envelope)
 
-            frames= range(0, ae.size)
-            t= librosa.frames_to_time(frames)
+            frames = range(0, amplitude_envelope.shape[0])
+            t = librosa.frames_to_time(frames)
 
             plt.figure(figsize=(15, 4))
             librosa.display.waveplot(self.audio_file, alpha=0.3)
             plt.title("Amplitude envelope")
             plt.xlabel('Time (seconds)')
             plt.ylabel('Amplitude')
-            plt.plot(t, ae, color="r", label='Amplitude envelope')
+            plt.plot(t, amplitude_envelope, color="r", label='Amplitude envelope')
             plt.ylim(-1, 1)
             plt.legend()
 
             return plt.show()
 
         else:
-            return np.array(amplitude_envelope)
-
-    def rms(self, show=False):
-
-        """
-        Calculate root mean square
-        (To visualize root mean square set argument show to True)
-
-        """
-        rms = []
-
-        for i in range(0, len(self.audio_file), self.hop_size):
-            # RMS mathematical formula
-            rms_current_frame = np.sqrt(np.sum(self.audio_file[i:i+self.frame_size]**2) / self.frame_size)
-            rms.append(rms_current_frame)
-
-        if show == True:
-            rms1 = np.array(rms)
-
-            frames= range(0, rms1.size)
-            t= librosa.frames_to_time(frames)
-
-            plt.figure(figsize=(15, 4))
-            librosa.display.waveplot(self.audio_file, alpha=0.3)
-            plt.title("Root-mean-square energy")
-            plt.plot(t, rms1, color="g")
-            plt.ylim(-1, 1)
-
-            return plt.show()
-
-        else:
-            return np.array(rms)
+            return amplitude_envelope
 
 
     def rms(self, show=False):
 
         """
-        Calculate root mean square
+        Compute root-mean-square (RMS) value for each frame from the audio samples.
         (To visualize root mean square set argument show to True)
 
         """
@@ -118,16 +86,16 @@ class AudioFeature():
         # Padding is achieved by mirroring on the first and last values of the signal with frame_length // 2 samples
         signal = np.pad(self.audio_file, int(self.frame_size // 2), mode='reflect')
 
-        rms = []
+        rms = np.zeros((int(self.shape[0]/self.hop_size)+1,))
 
-        for i in range(0, self.shape[0], self.hop_size):
+        for i, value in enumerate(range(0, self.shape[0], self.hop_size)):
 
-            rms_formula = np.sqrt(1 / self.frame_size * np.sum(signal[i:i+self.frame_size]**2))
-            rms.append(rms_formula)
+            rms_formula = np.sqrt(1 / self.frame_size * np.sum(signal[value:value+self.frame_size]**2))
+            rms[i] = rms_formula
 
         if show:
 
-            frames = range(0, len(rms))
+            frames = range(0, rms.shape[0])
             t = librosa.frames_to_time(frames)
 
             plt.figure(figsize=(16, 4))
@@ -141,7 +109,7 @@ class AudioFeature():
             return plt.show()
 
         else:
-            return np.array(rms)
+            return rms
 
     def spectral_centroid(self, show=False):
 
@@ -157,11 +125,11 @@ class AudioFeature():
         # Padding is achieved by mirroring on the first and last values of the signal with frame_length // 2 samples
         signal = np.pad(self.audio_file, int(self.frame_size // 2), mode='reflect')
 
-        centroid = []
+        centroid = np.zeros((int(self.shape[0]/self.hop_size)+1,))
 
-        for i in range(0, self.shape[0], self.hop_size):
+        for i, value in enumerate(range(0, self.shape[0], self.hop_size)):
 
-            cent = signal[i:i+self.frame_size]
+            cent = signal[value:value+self.frame_size]
 
             # Compute the discrete Fourier Transform (DFT) with the efficient Fast Fourier Transform (FFT)
             magnitudes = np.abs(np.fft.fft(cent)) # magnitude of absolute (real) frequency values
@@ -175,11 +143,11 @@ class AudioFeature():
             # Return weighted mean of the frequencies present in the signal
             normalize_mag = np.nan_to_num(mag / np.sum(mag))
             np.seterr(invalid='ignore') # Hide true_divide warning
-            centroid.append(np.sum(freq * normalize_mag))
+            centroid[i] = np.sum(freq * normalize_mag)
 
         if show:
 
-            frames = range(0, len(centroid))
+            frames = range(0, centroid.shape[0])
             t = librosa.frames_to_time(frames)
 
             plt.figure(figsize=(16, 4))
@@ -191,7 +159,7 @@ class AudioFeature():
             return plt.show()
 
         else:
-            return np.array(centroid)
+            return centroid
 
     def spectral_bandwidth(self, p=2, show=False):
 
@@ -204,12 +172,12 @@ class AudioFeature():
         # Padding is achieved by mirroring on the first and last values of the signal with frame_length // 2 samples
         signal = np.pad(self.audio_file, int(self.frame_size // 2), mode='reflect')
 
-        centroid = []
-        bandwidth = []
+        centroid = np.zeros((int(self.shape[0]/self.hop_size)+1,))
+        bandwidth = np.zeros((int(self.shape[0]/self.hop_size)+1,))
 
-        for i in range(0, self.shape[0], self.hop_size):
+        for i, value in enumerate(range(0, self.shape[0], self.hop_size)):
 
-            frame = signal[i:i+self.frame_size]
+            frame = signal[value:value+self.frame_size]
 
             # Compute the discrete Fourier Transform (DFT) with the efficient Fast Fourier Transform (FFT)
             magnitudes = np.abs(np.fft.fft(frame)) # magnitude of absolute (real) frequency values
@@ -224,14 +192,14 @@ class AudioFeature():
             normalize_mag = np.nan_to_num(mag / np.sum(mag))
             np.seterr(invalid='ignore') # Hide true_divide warning
             cent = np.sum(freq * normalize_mag)
-            centroid.append(cent)
+            centroid[i] = cent
 
             spectral_bandwidth = np.sum(normalize_mag * abs(freq - cent) ** p) ** (1.0/p)
-            bandwidth.append(spectral_bandwidth)
+            bandwidth[i] = spectral_bandwidth
 
         if show:
 
-            frames = range(0, len(bandwidth))
+            frames = range(0, bandwidth.shape[0])
             t = librosa.frames_to_time(frames)
 
             plt.figure(figsize=(16, 4))
@@ -244,22 +212,22 @@ class AudioFeature():
             return plt.show()
 
         else:
-            return np.array(bandwidth)
+            return bandwidth
 
 
     def zcr(self, show=False):
 
         """
-        Calculate zero crossing rate
+        Compute zero crossing rate with librosa.
         (To visualize zero crossing rate set argument show to True)
 
         """
-        # calculate zero crossing rate with librosa
+        # compute zero crossing rate with librosa
         zcr = librosa.feature.zero_crossing_rate(self.audio_file, frame_length=self.frame_size, hop_length=self.hop_size)[0]
 
         if show:
 
-            frames= range(0, len(zcr))
+            frames= range(0, zcr.shape[0])
             t=librosa.frames_to_time(frames, hop_length=self.hop_size)
             plt.figure(figsize=(15, 4))
             plt.title("Zero crossing rate (ZCR)")
@@ -277,7 +245,7 @@ class AudioFeature():
     def spectrograms(self, showLinear=False, showLog=False, showMel=False):
 
         """
-        Calculate conventional spectrogram
+        Compute conventional spectrograms.
         (To visualize linear-frequency spectrogram set argument showLinear to True)
         (To visualize log-frequency spectrogram set argument showLog to True)
         (To visualize mel spectrogram set argument showMel to True)
@@ -287,14 +255,14 @@ class AudioFeature():
         # extract short time fourier transform with librosa
         stft = librosa.stft(self.audio_file, n_fft=self.frame_size, hop_length=self.hop_size)
 
-        # calculate spectrogram and move amplitude to logarithmic scale
+        # compute spectrogram and move amplitude to logarithmic scale
         spec_log_amplitude = librosa.power_to_db(np.abs(stft) ** 2)
 
         # extracting mel spectrogram with librosa
         mel_spectrogram = librosa.feature.melspectrogram(self.audio_file,
                                                          n_fft=self.frame_size, hop_length=self.hop_size, n_mels=90)
 
-        # calculate mel spectrogram and move amplitude to logarithmic scale
+        # compute mel spectrogram and move amplitude to logarithmic scale
         mel_spectrogram_log = librosa.power_to_db(mel_spectrogram)
 
         if showLinear == True:
