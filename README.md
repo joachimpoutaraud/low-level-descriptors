@@ -10,7 +10,7 @@ This module encapsulates multiple audio feature extractors into a streamlined an
 
 ## Features to extract
 
-- Amplitude envelope
+- Average Absolute Amplitude (AAA)
 - Root mean square (RMS)
 - Spectral centroid
 - Spectral bandwidth
