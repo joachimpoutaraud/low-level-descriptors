@@ -31,3 +31,15 @@ def framing(signal, frame_length, hop_length):
         frames[i] = pad_signal[i*hop_length:i*hop_length+frame_length] * np.hanning(frame_length)
 
     return frames
+
+
+def frames_to_time(frames, hop_size, sr):
+
+    times = np.zeros((np.asarray(frames).shape[0]))
+    for i, value in enumerate(frames):
+        times[i] = i * hop_size / sr
+
+    return times
+
+
+

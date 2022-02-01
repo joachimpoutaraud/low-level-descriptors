@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import audiofeatures
-from audiofeatures.core import frames_to_time
-from audiofeatures.util import framing
+from audiofeatures.utilities import framing, frames_to_time
 
 """
 This module encapsulates multiple audio feature extractors into a streamlined and modular implementation.
@@ -91,21 +90,25 @@ def rms(self, show=False):
     else:
         return rms
 
-
-def zcr(self, show=False):
+    
+def zcr(self, treshold=0.0, show=False):
 
     """
-    Compute the zero-crossing rate of an audio time series.
+    Compute the zero crossing rate of an audio time series.
     """
-
+    
+    # Pad with the edge of the signal so that the frames are centered
+    signal = np.pad(self.audio_file, int(self.frame_size // 2), mode='edge')
+    
     # Slice the data array into (overlapping) frames.
-    frames = framing(self.audio_file, self.frame_size, self.hop_size)
+    frames = framing(signal, self.frame_size, self.hop_size)
     zcr = np.zeros((frames.shape[0]))
 
     for index, frame in enumerate(frames):
-        #To avoid DC bias, usually we need to perform mean subtraction on each frame
-        frame = frame-np.mean(frame)
-        zcr[index] = sum(frame[0:-1] * frame[1::]<=0) / self.sr
+        # Compute zero crossings on each frame
+        zero_crossings = frame[:-1] * frame[1:] < treshold
+        # Sum zero crossings and compute the mean to avoid DC bias
+        zcr[index] = sum(zero_crossings) / self.frame_size
 
     if show:
 
@@ -114,7 +117,7 @@ def zcr(self, show=False):
         plt.figure(figsize=(15, 4))
         plt.title("Zero crossing rate (ZCR)")
         plt.plot(times, zcr, color="r", label='ZCR')
-        plt.ylabel('Amplitude')
+        plt.ylabel('Rate')
         plt.xlabel('Time (Seconds)')
         plt.legend()
 
