@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 # coding: utf-8
 import librosa
@@ -6,7 +5,7 @@ import librosa
 class Audio:
 
     """
-    This is the class for working with audio files in the Audio Features Toolbox.
+    This is the class for working with audio files in the audio features toolbox.
     @author: joachimpoutaraud
     """
     def __init__(self, audio_file, frame_size=2048, hop_size=512, sr=44100):
@@ -25,12 +24,12 @@ class Audio:
         self.hop_size = hop_size
         self.shape = self.audio_file.shape
 
-    from audiofeatures.features import aaa as aaa
-    from audiofeatures.features import rms as rms
-    from audiofeatures.features import zcr as zcr
-    from audiofeatures.features import spectral_centroid as spectral_centroid
-    from audiofeatures.features import spectral_bandwidth as spectral_bandwidth
-    from audiofeatures.features import spectrograms as spectrograms
+    from audiofeatures.speech import aaa as aaa
+    from audiofeatures.speech import rms as rms
+    from audiofeatures.speech import zcr as zcr
+    from audiofeatures.sound import spectral_centroid as spectral_centroid
+    from audiofeatures.sound import spectral_bandwidth as spectral_bandwidth
+    from audiofeatures.sound import spectrograms as spectrograms
 
     def __repr__(self):
         return f"Audio('{self.filename}')"

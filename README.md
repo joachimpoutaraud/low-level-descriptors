@@ -1,6 +1,6 @@
-# Extract audio features for machine learning applications
+# Audio low-level descriptors (LLDs)
 
-This module encapsulates multiple audio feature extractors into a streamlined and modular implementation.
+This module encapsulates multiple audio low-level descriptors into a streamlined and modular implementation.
 
 ## Prerequisites
 
@@ -10,9 +10,12 @@ This module encapsulates multiple audio feature extractors into a streamlined an
 
 ## Features to extract
 
+*Speech*
 - Average Absolute Amplitude (AAA)
 - Root mean square (RMS)
+- Zero crossing rate (ZCR)
+
+*Sound*
 - Spectral centroid
 - Spectral bandwidth
-- Zero crossing rate (ZCR)
 - Spectrograms (Linear, Log-frequency, Mel)

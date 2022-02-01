@@ -11,89 +11,10 @@ from audiofeatures.core import frames_to_time
 This module encapsulates multiple audio feature extractors into a streamlined and modular implementation.
 Features to extract:
 
-- Average absolute amplitude (AAA)
-- Root mean square (RMS)
 - Spectral centroid
 - Spectral bandwidth
-- Zero crossing rate (ZCR)
 - Spectrograms (Linear, Log-frequency, Mel)
 """
-
-def aaa(self, show=False):
-
-    """
-    Compute average absolute amplitude (AAA) value for each frame from the audio samples.
-    (To visualize average absolute amplitude set argument show to True)
-
-    """
-
-    # Pad with the reflection of the signal so that the frames are centered
-    # Padding is achieved by mirroring on the first and last values of the signal with frame_length // 2 samples
-    signal = np.pad(self.audio_file, int(self.frame_size // 2), mode='reflect')
-
-    aaa = np.zeros((int(self.shape[0]/self.hop_size)+1,))
-
-    for i, value in enumerate(range(0, self.shape[0], self.hop_size)):
-
-        aaa_formula = 1 / self.frame_size * np.sum(np.abs(signal[value:value+self.frame_size]))
-        aaa[i] = aaa_formula
-
-    if show:
-
-        frames = range(0, aaa.shape[0])
-        times = frames_to_time(frames, self.hop_size, self.sr)
-
-        plt.figure(figsize=(16, 4))
-        librosa.display.waveplot(self.audio_file, alpha=0.3, sr=self.sr)
-        plt.title("Average absolute amplitude")
-        plt.xlabel('Time (Seconds)')
-        plt.ylabel('Magnitude')
-        plt.plot(times, aaa, color="g", label='AAA')
-        plt.ylim(-1, 1)
-        plt.legend()
-
-        return plt.show()
-
-    else:
-        return aaa
-
-
-def rms(self, show=False):
-
-    """
-    Compute root-mean-square (RMS) value for each frame from the audio samples.
-    (To visualize root mean square set argument show to True)
-
-    """
-
-    # Pad with the reflection of the signal so that the frames are centered
-    # Padding is achieved by mirroring on the first and last values of the signal with frame_length // 2 samples
-    signal = np.pad(self.audio_file, int(self.frame_size // 2), mode='reflect')
-
-    rms = np.zeros((int(self.shape[0]/self.hop_size)+1,))
-
-    for i, value in enumerate(range(0, self.shape[0], self.hop_size)):
-
-        rms_formula = np.sqrt(1 / self.frame_size * np.sum(signal[value:value+self.frame_size]**2))
-        rms[i] = rms_formula
-
-    if show:
-
-        frames = range(0, rms.shape[0])
-        times = frames_to_time(frames, self.hop_size, self.sr)
-
-        plt.figure(figsize=(16, 4))
-        librosa.display.waveplot(self.audio_file, alpha=0.3, sr=self.sr)
-        plt.title("Root-mean-square energy")
-        plt.xlabel('Time (Seconds)')
-        plt.ylabel('Magnitude')
-        plt.plot(times, rms, color="g", label='RMS')
-        plt.ylim(-1, 1)
-        plt.legend()
-        return plt.show()
-
-    else:
-        return rms
 
 def spectral_centroid(self, show=False):
 
@@ -144,6 +65,7 @@ def spectral_centroid(self, show=False):
 
     else:
         return centroid
+
 
 def spectral_bandwidth(self, p=2, show=False):
 
@@ -198,34 +120,6 @@ def spectral_bandwidth(self, p=2, show=False):
     else:
         return bandwidth
 
-
-def zcr(self, show=False):
-
-    """
-    Compute zero crossing rate with librosa.
-    (To visualize zero crossing rate set argument show to True)
-
-    """
-    # compute zero crossing rate with librosa
-    zcr = librosa.feature.zero_crossing_rate(self.audio_file, frame_length=self.frame_size, hop_length=self.hop_size)[0]
-
-    if show:
-
-        frames = range(0, zcr.shape[0])
-        times = frames_to_time(frames, self.hop_size, self.sr)
-
-        plt.figure(figsize=(15, 4))
-        plt.title("Zero crossing rate (ZCR)")
-        plt.plot(times, zcr, color="r", label='ZCR')
-        plt.ylabel('Magnitude')
-        plt.xlabel('Time (Seconds)')
-        plt.legend()
-        plt.ylim(-0.5, 0.5)
-
-        return plt.show()
-
-    else:
-        return zcr
 
 def spectrograms(self, showLinear=False, showLog=False, showMel=False):
 
