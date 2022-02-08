@@ -8,9 +8,9 @@ This module encapsulates multiple audio low-level descriptors into a streamlined
 - matplotlib
 - numpy
 
-## Import module
+## Importing low-level descriptors
 
-```
+```python
 import lowleveldescriptors as lld
 descriptors = lld.Audio('path_to_your_audio_file')
 
@@ -18,7 +18,7 @@ descriptors = lld.Audio('path_to_your_audio_file')
 descriptors.pda()
 ```
 
-## Low-level descriptors to extract
+## Low-level descriptors
 
 *Speech*
 - Average Absolute Amplitude (AAA)
