@@ -4,8 +4,7 @@ import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 
-import audiofeatures
-from audiofeatures.core import frames_to_time
+from lowleveldescriptors.utilities import frames_to_time
 
 """
 This module encapsulates multiple audio feature extractors into a streamlined and modular implementation.
@@ -24,6 +23,12 @@ def spectral_centroid(self, show=False):
     from which the mean (centroid) is extracted per frame.
 
     More precisely, the centroid at frame t is defined as: centroid[t] = sum_k S[k, t] * freq[k] / (sum_j S[j, t])
+
+    Args:
+        show (bool, optional): Set argument to True to visualize the spectral centroid.
+
+    Returns:
+        Spectral centroid.
     """
 
     # Pad with the reflection of the signal so that the frames are centered
@@ -72,6 +77,13 @@ def spectral_bandwidth(self, p=2, show=False):
     """
     Compute p’th-order spectral bandwidth.
     The spectral bandwidth 1 at frame t is computed by: (sum_k S[k, t] * (freq[k, t] - centroid[t])**p)**(1/p)
+
+    Args:
+        p (int, optional): Power to raise deviation from spectral centroid.
+        show (bool, optional): Set argument to True to visualize the spectral bandwidth.
+
+    Returns:
+        Spectral bandwidth.
     """
 
     # Pad with the reflection of the signal so that the frames are centered
