@@ -11,6 +11,9 @@ This module encapsulates multiple audio low-level descriptors into a streamlined
 ## Importing low-level descriptors
 
 ```python
+import sys
+!{sys.executable} -m pip install -r requirements.txt -q
+
 import lowleveldescriptors as lld
 descriptors = lld.Audio('path_to_your_audio_file')
 
