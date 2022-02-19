@@ -31,6 +31,8 @@ class Audio:
     from lowleveldescriptors.speech import rms as rms
     from lowleveldescriptors.speech import zcr as zcr
     from lowleveldescriptors.speech import pda as pda
+    from lowleveldescriptors.speech import hnr as hnr
+
     
     from lowleveldescriptors.sound import spectral_centroid as spectral_centroid
     from lowleveldescriptors.sound import spectral_bandwidth as spectral_bandwidth

@@ -27,6 +27,7 @@ descriptors.pda()
 - Root mean square (RMS)
 - Zero crossing rate (ZCR)
 - Pitch detection algorithm (PDA)
+- Harmonic to noise ratio (HNR)
 
 *Sound*
 - Spectral centroid

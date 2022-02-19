@@ -1,4 +1,5 @@
 
+from locale import normalize
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
@@ -14,6 +15,7 @@ Low-level descriptors to extract:
 - Root mean square (RMS)
 - Zero crossing rate (ZCR)
 - Pitch detection algorithm (PDA)
+- Harmonic to noise ratio (HNR)
 """
 
 def aaa(self, show=False):
@@ -141,18 +143,18 @@ def zcr(self, threshold=0, show=False):
     else:
         return zcr
 
-def pda(self, threshold=0, fmin=0, fmax=11025):
+def pda(self, threshold=0, fmin=50, fmax=4000):
 
     """
-    Pitch detection algorithm (PDA) to estimate the pitch of an audio time series using autocorrelation.
+    Compute fundamental frequency to estimate the pitch of a signal using autocorrelation.
     
     Args:
-        threshold (int, optional): Set the threshold of the maximum intensity value between 0 nad 1 (default to 0).
+        threshold (int, optional): Set the threshold of the maximum autocorrelation peak value between 0 and 1 (default to 0).
         fmin (int, optional): Set the minimum frequency to estimate the pitch of the audio time series (default to 0).
         fmax (int, optional): Set the maximum frequency to estimate the pitch of the audio time series (default to 11025).
 
     Returns:
-        Fundamental frequency of the selected audio file (or frame) using autocorrelation.
+        Fundamental frequency of a signal using autocorrelation.
     """
     
     # Return maximum absolute value of the frame array
@@ -165,24 +167,70 @@ def pda(self, threshold=0, fmin=0, fmax=11025):
     else:
         return 0
 
-    # Calculate autocorrelation using numpy correlate
-    corr = np.correlate(frame, frame, mode='full')
-    corr = corr[corr.shape[0]//2:] # keep only the positive part
+    # Calculate autocorrelation function (acf) using numpy correlate
+    acf = np.correlate(frame, frame, mode='full')
+    acf = acf[acf.shape[0]//2:] # keep only the positive part
 
-    # Find the first minimum peak indice
-    diff_corr = np.diff(corr) # calculate autocorrelation's discrete difference
-    rmin = np.where(diff_corr > 0)[0] # returns indices of the positive autocorrelation's discrete difference values
-    if rmin.shape[0] > 0:
-        first_peak = rmin[0]
+    # Find the location of the first autocorrelation's peak indice
+    diff = np.diff(acf) # calculate autocorrelation's discrete difference
+    peak_indices = np.where(diff > 0)[0] # return the indices of the peaks (positive discrete difference values)
+    
+    if peak_indices.shape[0] > 0:
+        first_peak_indice = peak_indices[0] # return the indice of the first autocorrelation peak 
     else:
         return 0
 
-    # Find the fundamental frequency
-    next_peak = np.argmax(corr[first_peak:]) + first_peak # returns the indice of the next peak
-    rmax = corr[next_peak]/corr[0] # normalize maximum intensity value
-    f0 = self.sr / next_peak # get the fundamental frequency
+    # Find the location of the maximum autocorrelation's peak indice
+    T0 = np.argmax(acf[first_peak_indice:]) + first_peak_indice # return the indice of the fundamental period
+    max_peak = acf[T0] / acf[acf.argmax()] # normalize the maximum autocorrelation peak value
+    f0 = self.sr / T0 # get the fundamental frequency
 
-    if rmax > threshold and f0 >= fmin and f0 <= fmax:
+    if max_peak > threshold and f0 >= fmin and f0 <= fmax:
         return f0
     else:
         return 0
+
+def hnr(self):
+
+    """
+    Compute the harmonic to noise ratio (HNR) as the ratio of the energy of a periodic signal, to the energy of the noise in the 
+    signal, expressed in dBFS. This value is often used as a measure of hoarseness in a person's voice.
+
+    Returns:
+        Harmonic to noise ratio of the signal expressed in dBFS.
+    """
+    
+    # Return maximum absolute value of the frame array
+    frame = self.audio_file.astype(float)
+    frame -= frame.mean()
+    amax = np.amax(np.abs(frame)) 
+    # Normalize the frame array between -1 and 1
+    if amax > 0:
+        frame /= amax
+    else:
+        return 0
+
+    # Calculate autocorrelation function (acf) using numpy correlate
+    acf = np.correlate(frame, frame, mode='full')
+    acf = acf[acf.shape[0]//2:] # keep only the positive part
+
+    # Find the location of the first autocorrelation's peak indice
+    diff = np.diff(acf) # calculate autocorrelation's discrete difference
+    peak_indices = np.where(diff > 0)[0] # return the indices of the peaks (positive discrete difference values)
+
+    if peak_indices.shape[0] > 0:
+        first_peak_indice = peak_indices[0] # return the indice of the first autocorrelation peak 
+    else:
+        return 0
+
+    # Calculate the harmonic to noise ratio (hnr)
+    T0 = np.argmax(acf[first_peak_indice:]) + first_peak_indice # return the indice of the fundamental period
+    hnr = 10.0 * np.log10(acf[T0] / (acf[acf.argmax()] - acf[T0]))
+
+    return hnr
+
+
+
+
+
+
